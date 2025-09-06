@@ -1,0 +1,13 @@
+<div class="customer-filter-container">
+  <form [formGroup]="filterForm" class="inline-filter-form">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Customer Name</mat-label>
+      <input 
+        matInput 
+        formControlName="name" 
+        placeholder="Search by customer name..."
+        autocomplete="off">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </form>
+</div>

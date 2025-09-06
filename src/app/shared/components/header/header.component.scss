@@ -1,0 +1,86 @@
+// Use global styles to override Material Design
+:host {
+  width: 100%;
+  display: block;
+}
+
+// Force header visibility with high specificity
+mat-toolbar.app-toolbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  min-height: 80px !important;
+  height: 80px !important;
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%) !important;
+  color: white !important;
+  padding: 0 !important;
+  
+  .toolbar-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+  }
+
+  .app-title {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    padding-left: 16px !important;
+    
+    .title-text {
+      font-size: 22px !important;
+      font-weight: 600 !important;
+      color: white !important;
+      line-height: 1.2 !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  }
+
+  .right-logo {
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    padding-right: 16px !important;
+    
+    .app-logo {
+      width: 40px !important;
+      height: 40px !important;
+      object-fit: contain !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .toolbar-content {
+      padding: 0 8px !important;
+    }
+
+    .app-title .title-text {
+      font-size: 18px !important;
+    }
+
+    .right-logo .app-logo {
+      width: 32px !important;
+      height: 32px !important;
+    }
+  }
+}
+
+// Additional specificity override
+.mat-toolbar.app-toolbar {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%) !important;
+  color: white !important;
+  min-height: 80px !important;
+  
+  span.title-text {
+    color: white !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+  }
+}

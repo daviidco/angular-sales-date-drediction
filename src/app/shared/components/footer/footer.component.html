@@ -1,0 +1,58 @@
+<!-- Footer -->
+<footer class="app-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <div class="footer-brand">
+        <mat-icon class="footer-icon">analytics</mat-icon>
+        <span class="brand-name">Sales Prediction System</span>
+      </div>
+      <p class="footer-description">
+        Sistema inteligente de predicción de ventas con análisis avanzado y machine learning
+      </p>
+    </div>
+    
+    <div class="footer-section">
+      <h4>Características</h4>
+      <ul class="footer-links">
+        <li *ngFor="let feature of features">{{ feature }}</li>
+      </ul>
+    </div>
+    
+    <div class="footer-section">
+      <h4>Contacto</h4>
+      <div class="contact-info">
+        <div class="contact-item" (click)="onContactClick('email', contactInfo.email)" (keyup.enter)="onContactClick('email', contactInfo.email)" tabindex="0" role="button">
+          <mat-icon>email</mat-icon>
+          <span>{{ contactInfo.email }}</span>
+        </div>
+        <div class="contact-item" (click)="onContactClick('phone', contactInfo.phone)" (keyup.enter)="onContactClick('phone', contactInfo.phone)" tabindex="0" role="button">
+          <mat-icon>phone</mat-icon>
+          <span>{{ contactInfo.phone }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-section">
+      <h4>Síguenos</h4>
+      <div class="social-links">
+        <button 
+          *ngFor="let social of socialLinks"
+          mat-icon-button 
+          [matTooltip]="social.tooltip"
+          (click)="onSocialLinkClick(social.tooltip, social.url)">
+          <mat-icon>{{ social.icon }}</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <span class="copyright">© {{ currentYear }} Sales Prediction System. Todos los derechos reservados.</span>
+    <div class="tech-stack">
+      <ng-container *ngFor="let tech of techStack; let last = last">
+        <span class="tech-item">{{ tech }}</span>
+        <span class="separator" *ngIf="!last">•</span>
+      </ng-container>
+    </div>
+  </div>
+</footer>

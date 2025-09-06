@@ -1,0 +1,23 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  color: #212121;
+  
+  /* Contenido Principal */
+  .app-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+    
+    /* Asegurar que router-outlet ocupe todo el espacio */
+    ::ng-deep router-outlet + * {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+  

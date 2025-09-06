@@ -1,0 +1,34 @@
+<div class="customer-list-container">
+  <!-- Header con título y filtro -->
+  <div class="header-section">
+    <app-customer-title title="Customers"></app-customer-title>
+    
+    <app-customer-filter
+      (filterChange)="onFilterChange($event)"
+      (clearFilters)="onClearFilters()">
+    </app-customer-filter>
+  </div>
+
+  <!-- Estado de Error -->
+  @if (error()) {
+    <div class="error-container">
+      <div class="error-content">
+        <mat-icon>error_outline</mat-icon>
+        <h3>Error al cargar los datos</h3>
+        <p>{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="onRetry()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Tabla de Datos -->
+    <app-customer-data-table
+      [customers]="filteredCustomers()"
+      [loading]="loading()"
+      (viewOrders)="onViewOrders($event)"
+      (newOrder)="onNewOrder($event)">
+    </app-customer-data-table>
+  }
+</div>

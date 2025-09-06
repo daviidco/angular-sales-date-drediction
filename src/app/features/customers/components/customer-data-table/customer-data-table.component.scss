@@ -1,0 +1,49 @@
+// Following Angular Material official example pattern
+table {
+  width: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+
+  mat-spinner {
+    margin-bottom: 16px;
+  }
+}
+
+// Action buttons styling
+.action-link {
+  cursor: pointer;
+  font-size: 12px;
+  margin-right: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.view-orders {
+    color: #dc2626;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.new-order {
+    color: #065f46;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Header styling for icons
+th mat-icon {
+  margin-right: 8px;
+  vertical-align: middle;
+}
