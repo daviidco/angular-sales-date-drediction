@@ -1,14 +1,24 @@
-import { Component, Input, OnInit, AfterViewInit, OnChanges, ViewChild, Output, EventEmitter } from '@angular/core';
+// customer-data-table.component.ts
+import {
+  Component,
+  Input,
+  OnInit,
+  AfterViewInit,
+  OnChanges,
+  ViewChild,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-
-import { CustomerListItem, CustomerStatus } from '../../../../shared/models/customer';
+import { MatButtonModule } from '@angular/material/button'; // ✅ AGREGAR ESTE IMPORT
+import { CustomerListItem } from '../../../../shared/models/customer';
+import { CustomerTitleComponent } from '../customer-title/customer-title.component';
+import { CustomerFilterComponent } from '../customer-filter/customer-filter.component';
 
 @Component({
   selector: 'app-customer-data-table',
@@ -22,9 +32,10 @@ import { CustomerListItem, CustomerStatus } from '../../../../shared/models/cust
     MatSortModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule
-  ]
+    MatButtonModule,
+    CustomerTitleComponent,
+    CustomerFilterComponent
+  ],
 })
 export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChanges {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -35,30 +46,44 @@ export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChan
 
   @Output() viewOrders = new EventEmitter<string>();
   @Output() newOrder = new EventEmitter<string>();
+  @Output() filterChange = new EventEmitter<string>();
 
   dataSource = new MatTableDataSource<CustomerListItem>([]);
-  
-  readonly displayedColumns: string[] = ['name', 'lastOrderDate', 'nextPredictedOrderDate', 'actions'];
+  readonly displayedColumns: string[] = [
+    'name',
+    'lastOrderDate',
+    'nextPredictedOrderDate',
+    'actions',
+  ];
   readonly pageSizeOptions: number[] = [10, 25, 50, 100];
-  
 
   ngOnInit(): void {
     this.updateDataSource();
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-    
     // Configurar sorting personalizado para fechas
     this.dataSource.sortingDataAccessor = (item: CustomerListItem, property: string) => {
       switch (property) {
-        case 'name': return item.name.toLowerCase();
-        case 'lastOrderDate': return item.lastOrderDate?.getTime() || 0;
-        case 'nextPredictedOrderDate': return item.nextPredictedOrderDate?.getTime() || 0;
-        default: return (item as any)[property];
+        case 'name':
+          return item.name.toLowerCase();
+        case 'lastOrderDate':
+          return item.lastOrderDate?.getTime() || 0;
+        case 'nextPredictedOrderDate':
+          return item.nextPredictedOrderDate?.getTime() || 0;
+        default:
+          return '';
       }
     };
+
+    // Configurar filtro personalizado
+    this.dataSource.filterPredicate = (data: CustomerListItem, filter: string) => {
+      return data.name.toLowerCase().includes(filter);
+    };
+
+    // Asignar paginator y sort
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngOnChanges(): void {
@@ -68,34 +93,28 @@ export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChan
   private updateDataSource(): void {
     this.dataSource.data = this.customers;
     
-    // Reset a la primera página cuando cambien los datos
+    // Reconectar paginator y sort después de actualizar data
     if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
       this.paginator.firstPage();
+    }
+    
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
     }
   }
 
-  trackByCustomerId(index: number, item: CustomerListItem): string {
+  trackByCustomerId(_index: number, item: CustomerListItem): string {
     return item.id;
   }
 
   formatDate(date: Date | null): string {
     if (!date) return 'Sin registro';
-    
     return new Intl.DateTimeFormat('es-ES', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     }).format(date);
-  }
-
-  formatDays(days: number | null): string {
-    if (days === null) return '-';
-    
-    if (days === 0) return 'Hoy';
-    if (days === 1) return 'Mañana';
-    if (days > 0) return `En ${days} días`;
-    if (days === -1) return 'Ayer';
-    return `Hace ${Math.abs(days)} días`;
   }
 
   onViewOrders(customerId: string): void {
@@ -106,10 +125,16 @@ export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChan
     this.newOrder.emit(customerId);
   }
 
-  getDaysClass(days: number | null): string {
-    if (days === null) return '';
-    if (days < 0) return 'days-past';
-    if (days <= 7) return 'days-soon';
-    return 'days-future';
+  onFilterChange(filterValue: string): void {
+    // Aplicar filtro local usando MatTableDataSource
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    
+    // Reset paginator al filtrar
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+    
+    // También emitir el evento por si el componente padre lo necesita
+    this.filterChange.emit(filterValue);
   }
 }

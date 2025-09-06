@@ -5,29 +5,29 @@
   </div>
 } @else {
   <div class="mat-elevation-z8">
+    <!-- Header con título y filtro -->
+    <div class="table-header">
+      <app-customer-title title="Customers"></app-customer-title>
+      <app-customer-filter (filterChange)="onFilterChange($event)"></app-customer-filter>
+    </div>
+    
     <table mat-table [dataSource]="dataSource" matSort>
 
       <!-- Columna Nombre -->
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> 
-          <mat-icon>person</mat-icon> Customer Name 
-        </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</th>
         <td mat-cell *matCellDef="let customer">{{ customer.name }}</td>
       </ng-container>
 
       <!-- Columna Última Orden -->
       <ng-container matColumnDef="lastOrderDate">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> 
-          <mat-icon>schedule</mat-icon> Last Order Date 
-        </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Order Date</th>
         <td mat-cell *matCellDef="let customer">{{ formatDate(customer.lastOrderDate) }}</td>
       </ng-container>
 
       <!-- Columna Próxima Orden Predicha -->
       <ng-container matColumnDef="nextPredictedOrderDate">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> 
-          <mat-icon>trending_up</mat-icon> Next Predicted Order 
-        </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Next Predicted Order</th>
         <td mat-cell *matCellDef="let customer">{{ formatDate(customer.nextPredictedOrderDate) }}</td>
       </ng-container>
 

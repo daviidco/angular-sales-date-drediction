@@ -8,8 +8,6 @@ import { CustomerService } from '../../../core/services/customer';
 import { CustomerListItem, CustomerFilterCriteria } from '../../../shared/models/customer';
 
 // Componentes
-import { CustomerTitleComponent } from '../components/customer-title/customer-title.component';
-import { CustomerFilterComponent } from '../components/customer-filter/customer-filter.component';
 import { CustomerDataTableComponent } from '../components/customer-data-table/customer-data-table.component';
 
 @Component({
@@ -21,8 +19,6 @@ import { CustomerDataTableComponent } from '../components/customer-data-table/cu
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    CustomerTitleComponent,
-    CustomerFilterComponent,
     CustomerDataTableComponent
   ]
 })
@@ -64,9 +60,10 @@ export class CustomerListComponent implements OnInit {
       });
   }
 
-  onFilterChange(criteria: CustomerFilterCriteria): void {
-    this.currentFilterCriteria = criteria;
-    this.loadCustomers();
+  onFilterChange(filterValue: string): void {
+    // No recargar datos, el filtrado es local en la tabla
+    // Solo mantener el criterio para futuras cargas si es necesario
+    this.currentFilterCriteria = { name: filterValue };
   }
 
   onClearFilters(): void {
