@@ -1,0 +1,142 @@
+.modal-container {
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px 24px;
+  background: #dc2626;
+  margin: -24px -24px 0 -24px;
+  
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+  }
+}
+
+.modal-content {
+  flex: 1;
+  padding: 20px 24px;
+  overflow: hidden;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  
+  mat-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0;
+    color: #666;
+  }
+}
+
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.error-content {
+  text-align: center;
+  max-width: 400px;
+  
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #f44336;
+    margin-bottom: 16px;
+  }
+  
+  h3 {
+    margin: 0 0 12px;
+    color: #333;
+  }
+  
+  p {
+    margin: 0 0 20px;
+    color: #666;
+    line-height: 1.4;
+  }
+}
+
+.table-container {
+  height: 100%;
+  overflow: auto;
+}
+
+.orders-table {
+  width: 100%;
+  
+  th {
+    background: #fafafa;
+    font-weight: 600;
+    color: #424242;
+  }
+  
+  td {
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-style: italic;
+  }
+}
+
+.modal-actions {
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  
+  button {
+    min-width: 80px;
+  }
+  
+  .close-button {
+    color: #dc2626;
+    font-weight: bold;
+    
+    &:hover {
+      background-color: rgba(220, 38, 38, 0.1);
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .modal-container {
+    max-height: 90vh;
+  }
+  
+  .modal-header,
+  .modal-content,
+  .modal-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .orders-table {
+    font-size: 14px;
+    
+    th, td {
+      padding: 8px 4px;
+    }
+  }
+}

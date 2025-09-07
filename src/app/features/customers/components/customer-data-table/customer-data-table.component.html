@@ -35,7 +35,7 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let customer">
-          <span class="action-link view-orders" (click)="onViewOrders(customer.id)">VIEW ORDERS</span>
+          <span class="action-link view-orders" (click)="onViewOrders(customer)">VIEW ORDERS</span>
           <span class="action-link new-order" (click)="onNewOrder(customer.id)">NEW ORDER</span>
         </td>
       </ng-container>

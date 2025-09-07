@@ -3,7 +3,8 @@
 // ✅ EXACTAMENTE igual al ejemplo oficial de Material
 .mat-mdc-form-field {
   font-size: 14px;
-  width: 100%;
+  width: 300px;
+  min-width: 250px;
 }
 
 // ✅ Responsive para móviles

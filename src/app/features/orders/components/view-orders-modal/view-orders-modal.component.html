@@ -1,0 +1,86 @@
+<div class="modal-container">
+  <div class="modal-header">
+    <h2 mat-dialog-title>Customer {{ customerName }} - Orders</h2>
+  </div>
+
+  <div mat-dialog-content class="modal-content">
+    @if (loading) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading orders...</p>
+      </div>
+    } @else if (error) {
+      <div class="error-container">
+        <div class="error-content">
+          <mat-icon>error_outline</mat-icon>
+          <h3>Error loading orders</h3>
+          <p>{{ error }}</p>
+          <button mat-raised-button color="primary" (click)="onRetry()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="orders-table">
+
+          <!-- Order ID Column -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Order ID</th>
+            <td mat-cell *matCellDef="let order">{{ order.id }}</td>
+          </ng-container>
+
+          <!-- Required Date Column -->
+          <ng-container matColumnDef="requiredDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Required Date</th>
+            <td mat-cell *matCellDef="let order">{{ formatDate(order.requiredDate) }}</td>
+          </ng-container>
+
+          <!-- Shipped Date Column -->
+          <ng-container matColumnDef="shippedDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Shipped Date</th>
+            <td mat-cell *matCellDef="let order">{{ formatDate(order.shippedDate) }}</td>
+          </ng-container>
+
+          <!-- Ship Name Column -->
+          <ng-container matColumnDef="shipName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Ship Name</th>
+            <td mat-cell *matCellDef="let order">{{ order.shipName || 'N/A' }}</td>
+          </ng-container>
+
+          <!-- Ship Address Column -->
+          <ng-container matColumnDef="shipAddress">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Ship Address</th>
+            <td mat-cell *matCellDef="let order">{{ order.shipAddress || 'N/A' }}</td>
+          </ng-container>
+
+          <!-- Ship City Column -->
+          <ng-container matColumnDef="shipCity">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Ship City</th>
+            <td mat-cell *matCellDef="let order">{{ order.shipCity || 'N/A' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <!-- No data row -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+              No orders found for this customer
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator 
+          [pageSizeOptions]="pageSizeOptions" 
+          aria-label="Select page of orders">
+        </mat-paginator>
+      </div>
+    }
+  </div>
+
+  <div mat-dialog-actions class="modal-actions">
+    <button mat-button class="close-button" (click)="onClose()">CLOSE</button>
+  </div>
+</div>

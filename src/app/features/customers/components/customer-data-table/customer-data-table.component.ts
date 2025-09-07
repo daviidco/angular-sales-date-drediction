@@ -44,7 +44,7 @@ export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChan
   @Input() customers: CustomerListItem[] = [];
   @Input() loading = false;
 
-  @Output() viewOrders = new EventEmitter<string>();
+  @Output() viewOrders = new EventEmitter<{customerId: string, customerName: string}>();
   @Output() newOrder = new EventEmitter<string>();
   @Output() filterChange = new EventEmitter<string>();
 
@@ -58,32 +58,41 @@ export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChan
   readonly pageSizeOptions: number[] = [10, 25, 50, 100];
 
   ngOnInit(): void {
+    // Inicializar dataSource con configuraciones básicas
+    this.dataSource = new MatTableDataSource<CustomerListItem>(this.customers);
     this.updateDataSource();
   }
 
   ngAfterViewInit(): void {
-    // Configurar sorting personalizado para fechas
-    this.dataSource.sortingDataAccessor = (item: CustomerListItem, property: string) => {
-      switch (property) {
-        case 'name':
-          return item.name.toLowerCase();
-        case 'lastOrderDate':
-          return item.lastOrderDate?.getTime() || 0;
-        case 'nextPredictedOrderDate':
-          return item.nextPredictedOrderDate?.getTime() || 0;
-        default:
-          return '';
-      }
-    };
+    // Verificar que los ViewChild estén disponibles
+    if (this.paginator && this.sort) {
+      // Asignar paginator y sort
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
 
-    // Configurar filtro personalizado
-    this.dataSource.filterPredicate = (data: CustomerListItem, filter: string) => {
-      return data.name.toLowerCase().includes(filter);
-    };
+      // Configurar sorting personalizado para fechas
+      this.dataSource.sortingDataAccessor = (item: CustomerListItem, property: string): string | number => {
+        switch (property) {
+          case 'name':
+            return item.name ? item.name.toLowerCase() : '';
+          case 'lastOrderDate':
+            return item.lastOrderDate ? item.lastOrderDate.getTime() : 0;
+          case 'nextPredictedOrderDate':
+            return item.nextPredictedOrderDate ? item.nextPredictedOrderDate.getTime() : 0;
+          default:
+            // Para propiedades no especificadas, retornar string vacío
+            return '';
+        }
+      };
 
-    // Asignar paginator y sort
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+      // Configurar filtro personalizado
+      this.dataSource.filterPredicate = (data: CustomerListItem, filter: string) => {
+        return data.name.toLowerCase().includes(filter);
+      };
+    } else {
+      // Retry en el próximo ciclo si los ViewChild no están listos
+      setTimeout(() => this.ngAfterViewInit(), 0);
+    }
   }
 
   ngOnChanges(): void {
@@ -117,8 +126,8 @@ export class CustomerDataTableComponent implements OnInit, AfterViewInit, OnChan
     }).format(date);
   }
 
-  onViewOrders(customerId: string): void {
-    this.viewOrders.emit(customerId);
+  onViewOrders(customer: CustomerListItem): void {
+    this.viewOrders.emit({customerId: customer.id, customerName: customer.name});
   }
 
   onNewOrder(customerId: string): void {

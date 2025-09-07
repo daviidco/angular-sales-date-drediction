@@ -3,28 +3,34 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { CustomerService } from '../../../core/services/customer';
 import { CustomerListItem, CustomerFilterCriteria } from '../../../shared/models/customer';
 
 // Componentes
 import { CustomerDataTableComponent } from '../components/customer-data-table/customer-data-table.component';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  ViewOrdersModalComponent,
+  ViewOrdersModalData,
+} from '../../orders/components/view-orders-modal/view-orders-modal.component';
+import {
+  NewOrderModalComponent,
+  NewOrderModalData,
+} from '../../orders/components/new-order-modal/new-order-modal.component';
 
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    CustomerDataTableComponent
-  ]
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, CustomerDataTableComponent],
 })
 export class CustomerListComponent implements OnInit {
   private customerService = inject(CustomerService);
   private destroyRef = inject(DestroyRef);
+  private dialog = inject(MatDialog);
 
   // Estado reactivo
   customers = signal<CustomerListItem[]>([]);
@@ -35,7 +41,7 @@ export class CustomerListComponent implements OnInit {
 
   // Computed values
   customerCount = computed(() => this.filteredCustomers().length);
-  
+
   ngOnInit(): void {
     this.loadCustomers();
   }
@@ -43,8 +49,9 @@ export class CustomerListComponent implements OnInit {
   private loadCustomers(): void {
     this.loading.set(true);
     this.error.set(null);
-    
-    this.customerService.getCustomers(this.currentFilterCriteria)
+
+    this.customerService
+      .getCustomers(this.currentFilterCriteria)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (customers) => {
@@ -56,7 +63,7 @@ export class CustomerListComponent implements OnInit {
           console.error('Error loading customers:', err);
           this.error.set('Error al cargar los clientes. Por favor, intente nuevamente.');
           this.loading.set(false);
-        }
+        },
       });
   }
 
@@ -75,13 +82,33 @@ export class CustomerListComponent implements OnInit {
     this.loadCustomers();
   }
 
-  onViewOrders(customerId: string): void {
-    // TODO: Implementar navegación a vista de órdenes
-    console.log('View orders for customer:', customerId);
+  onViewOrders(event: {customerId: string, customerName: string}): void {
+    const data: ViewOrdersModalData = { customerId: event.customerId, customerName: event.customerName };
+
+    this.dialog.open(ViewOrdersModalComponent, {
+      width: '80%',
+      data,
+    });
   }
 
   onNewOrder(customerId: string): void {
-    // TODO: Implementar navegación a nueva orden
-    console.log('New order for customer:', customerId);
+    // Find customer name
+    const customer = this.customers().find(c => c.id === customerId);
+    const customerName = customer?.name || 'Unknown Customer';
+    
+    const data: NewOrderModalData = { customerId, customerName };
+
+    const dialogRef = this.dialog.open(NewOrderModalComponent, {
+      width: '70%',
+      maxWidth: '800px',
+      data,
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Order created:', result);
+        // Optionally refresh customer data or show success message
+      }
+    });
   }
 }

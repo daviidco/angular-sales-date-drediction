@@ -1,11 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of, delay, map } from 'rxjs';
 import { Customer, CustomerListItem, CustomerFilterCriteria, CustomerStatus } from '../../shared/models/customer';
+import { ApiService, PaginationParams } from '../api/api.service';
+import { API_ENDPOINTS } from '../api/api.config';
+import { PaginatedResponse } from '../models/api-response.model';
+import { Customer as ApiCustomer, SalesDatePrediction } from '../models/api-interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
+  private apiService = inject(ApiService);
   private mockCustomers: Customer[] = [
     {
       id: '1',
@@ -95,18 +100,83 @@ export class CustomerService {
     }
   ];
 
+  // API Methods - Producción
   getCustomers(filterCriteria?: CustomerFilterCriteria): Observable<CustomerListItem[]> {
+    // Usar endpoint de sales prediction para poblar la tabla principal
+    return this.apiService.get<SalesDatePrediction[]>(API_ENDPOINTS.SALES_PREDICTION).pipe(
+      map(predictions => this.transformSalesPredictionsToListItems(predictions)),
+      map(customers => this.applyFilters(customers, filterCriteria))
+    );
+  }
+  
+  getCustomersPaginated(
+    pagination?: PaginationParams,
+    filterCriteria?: CustomerFilterCriteria
+  ): Observable<PaginatedResponse<CustomerListItem>> {
+    return this.apiService.getPaginated<CustomerListItem>(
+      API_ENDPOINTS.CUSTOMER,
+      pagination,
+      { params: this.buildFilterParams(filterCriteria) }
+    );
+  }
+
+  getCustomerById(id: string): Observable<Customer | null> {
+    return this.apiService.getById<ApiCustomer>(API_ENDPOINTS.CUSTOMER, id).pipe(
+      map(apiCustomer => apiCustomer ? this.transformApiCustomerToCustomer(apiCustomer) : null)
+    );
+  }
+
+  getSalesPrediction(): Observable<SalesDatePrediction[]> {
+    return this.apiService.get<SalesDatePrediction[]>(API_ENDPOINTS.SALES_PREDICTION);
+  }
+  
+  createCustomer(customer: Omit<Customer, 'id' | 'createdAt'>): Observable<Customer> {
+    return this.apiService.post<Customer>(API_ENDPOINTS.CUSTOMER, customer);
+  }
+  
+  updateCustomer(id: string, customer: Partial<Customer>): Observable<Customer> {
+    return this.apiService.putById<Customer>(API_ENDPOINTS.CUSTOMER, id, customer);
+  }
+  
+  deleteCustomer(id: string): Observable<void> {
+    return this.apiService.deleteById(API_ENDPOINTS.CUSTOMER, id);
+  }
+  
+  // Método mock temporal
+  private getMockCustomers(filterCriteria?: CustomerFilterCriteria): Observable<CustomerListItem[]> {
     return of(this.mockCustomers).pipe(
-      delay(800), // Simular latencia de red
+      delay(800),
       map(customers => this.transformToListItems(customers)),
       map(customers => this.applyFilters(customers, filterCriteria))
     );
   }
 
-  getCustomerById(id: string): Observable<Customer | null> {
-    return of(this.mockCustomers.find(customer => customer.id === id) || null).pipe(
-      delay(300)
-    );
+  private transformApiCustomersToListItems(apiCustomers: ApiCustomer[]): CustomerListItem[] {
+    const today = new Date();
+    
+    return apiCustomers.map(apiCustomer => ({
+      id: apiCustomer.id.toString(),
+      name: apiCustomer.companyName,
+      lastOrderDate: null, // Se obtendría de las órdenes o predicciones
+      nextPredictedOrderDate: null, // Se obtendría del endpoint de predicciones
+      daysSinceLastOrder: null,
+      daysToNextOrder: null,
+      status: CustomerStatus.ACTIVE // Por defecto, se podría calcular basado en última orden
+    }));
+  }
+
+  private transformApiCustomerToCustomer(apiCustomer: ApiCustomer): Customer {
+    return {
+      id: apiCustomer.id.toString(),
+      name: apiCustomer.companyName,
+      email: '', // No disponible en API
+      phone: apiCustomer.phone || '',
+      lastOrderDate: null,
+      nextPredictedOrderDate: null,
+      totalOrders: 0,
+      status: CustomerStatus.ACTIVE,
+      createdAt: new Date()
+    };
   }
 
   private transformToListItems(customers: Customer[]): CustomerListItem[] {
@@ -150,5 +220,26 @@ export class CustomerService {
     const oneDay = 24 * 60 * 60 * 1000; // milisegundos en un día
     const diffTime = toDate.getTime() - fromDate.getTime();
     return Math.round(diffTime / oneDay);
+  }
+  
+  private buildFilterParams(filterCriteria?: CustomerFilterCriteria): Record<string, any> {
+    if (!filterCriteria) return {};
+    
+    const params: Record<string, any> = {};
+    
+    if (filterCriteria.name) {
+      params['name'] = filterCriteria.name;
+    }
+    
+    if (filterCriteria.status) {
+      params['status'] = filterCriteria.status;
+    }
+    
+    if (filterCriteria.dateRange) {
+      params['startDate'] = filterCriteria.dateRange.start.toISOString();
+      params['endDate'] = filterCriteria.dateRange.end.toISOString();
+    }
+    
+    return params;
   }
 }

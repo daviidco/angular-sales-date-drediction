@@ -27,9 +27,26 @@ table {
 }
 
 // Action buttons styling
+// Material Sort Header styling
+th[mat-sort-header] {
+  cursor: pointer;
+  user-select: none;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  
+  // Sort arrow visibility
+  .mat-sort-header-arrow {
+    opacity: 0.54;
+  }
+}
+
+// Action buttons styling
 .action-link {
   cursor: pointer;
   font-size: 12px;
+  font-weight: bold;
   margin-right: 8px;
   text-decoration: none;
   transition: all 0.2s ease;
