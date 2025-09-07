@@ -72,18 +72,22 @@ export class OrderService {
   }
 
   private transformOrderRequestToApi(order: OrderRequest): ApiOrderRequest {
+    const convertDateToString = (date: string | Date): string => {
+      return typeof date === 'string' ? date : date.toISOString();
+    };
+
     return {
-      custId: parseInt(order.customerId),
+      custId: order.customerId ? parseInt(order.customerId) : order.custId,
       empId: order.empId,
       shipperId: order.shipperId,
-      shipName: order.shipName,
-      shipAddress: order.shipAddress,
-      shipCity: order.shipCity,
-      orderDate: order.orderDate.toISOString(),
-      requiredDate: order.requiredDate.toISOString(),
-      shippedDate: order.shippedDate?.toISOString(),
+      shipName: order.shipName || undefined,
+      shipAddress: order.shipAddress || undefined,
+      shipCity: order.shipCity || undefined,
+      orderDate: convertDateToString(order.orderDate),
+      requiredDate: convertDateToString(order.requiredDate),
+      shippedDate: order.shippedDate ? convertDateToString(order.shippedDate) : undefined,
       freight: order.freight,
-      shipCountry: order.shipCountry,
+      shipCountry: order.shipCountry || undefined,
       productId: order.productId,
       unitPrice: order.unitPrice,
       qty: order.qty,
@@ -93,20 +97,22 @@ export class OrderService {
 
   private transformApiOrderToOrder(apiOrder: ApiOrder): Order {
     return {
-      id: apiOrder.id.toString(),
-      customerId: apiOrder.custId.toString(),
+      id: apiOrder.id,
+      custId: apiOrder.custId,
       empId: apiOrder.empId,
       orderDate: new Date(apiOrder.orderDate),
       requiredDate: new Date(apiOrder.requiredDate),
-      shippedDate: apiOrder.shippedDate ? new Date(apiOrder.shippedDate) : undefined,
+      shippedDate: apiOrder.shippedDate ? new Date(apiOrder.shippedDate) : null,
       shipperId: apiOrder.shipperId,
       freight: apiOrder.freight,
-      shipName: apiOrder.shipName || '',
-      shipAddress: apiOrder.shipAddress || '',
-      shipCity: apiOrder.shipCity || '',
-      shipRegion: apiOrder.shipRegion || '',
-      shipPostalCode: apiOrder.shipPostalCode || '',
-      shipCountry: apiOrder.shipCountry || ''
+      shipName: apiOrder.shipName || null,
+      shipAddress: apiOrder.shipAddress || null,
+      shipCity: apiOrder.shipCity || null,
+      shipCountry: apiOrder.shipCountry || null,
+      productId: 0, // Placeholder - would come from order details
+      unitPrice: 0, // Placeholder - would come from order details
+      qty: 0, // Placeholder - would come from order details
+      discount: 0 // Placeholder - would come from order details
     };
   }
 }

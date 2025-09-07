@@ -138,6 +138,7 @@ export class NewOrderModalComponent implements OnInit {
       const formValue = this.orderForm.value;
       
       const orderRequest: OrderRequest = {
+        custId: parseInt(this.data.customerId),
         customerId: this.data.customerId,
         empId: formValue.empId,
         shipperId: formValue.shipperId,

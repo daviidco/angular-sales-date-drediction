@@ -151,6 +151,22 @@ export class CustomerService {
     );
   }
 
+  private transformSalesPredictionsToListItems(predictions: SalesDatePrediction[]): CustomerListItem[] {
+    const today = new Date();
+    
+    return predictions.map(prediction => ({
+      id: prediction.customerId.toString(),
+      name: prediction.customerName,
+      lastOrderDate: prediction.lastOrderDate ? new Date(prediction.lastOrderDate) : null,
+      nextPredictedOrderDate: new Date(prediction.predictedDate),
+      daysSinceLastOrder: prediction.lastOrderDate 
+        ? this.calculateDaysDifference(new Date(prediction.lastOrderDate), today)
+        : null,
+      daysToNextOrder: this.calculateDaysDifference(today, new Date(prediction.predictedDate)),
+      status: this.determineStatusFromPrediction(prediction)
+    }));
+  }
+
   private transformApiCustomersToListItems(apiCustomers: ApiCustomer[]): CustomerListItem[] {
     const today = new Date();
     
@@ -163,6 +179,25 @@ export class CustomerService {
       daysToNextOrder: null,
       status: CustomerStatus.ACTIVE // Por defecto, se podría calcular basado en última orden
     }));
+  }
+
+  private determineStatusFromPrediction(prediction: SalesDatePrediction): CustomerStatus {
+    if (!prediction.lastOrderDate) {
+      return CustomerStatus.NEW;
+    }
+    
+    const daysSinceLastOrder = this.calculateDaysDifference(
+      new Date(prediction.lastOrderDate), 
+      new Date()
+    );
+    
+    if (daysSinceLastOrder > 90) {
+      return CustomerStatus.INACTIVE;
+    } else if (daysSinceLastOrder > 30) {
+      return CustomerStatus.AT_RISK;
+    } else {
+      return CustomerStatus.ACTIVE;
+    }
   }
 
   private transformApiCustomerToCustomer(apiCustomer: ApiCustomer): Customer {

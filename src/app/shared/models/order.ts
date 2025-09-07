@@ -5,15 +5,16 @@ export interface OrderRequest {
   shipName: string | null;
   shipAddress: string | null;
   shipCity: string | null;
-  orderDate: string; // DateTime como string ISO
-  requiredDate: string; // DateTime como string ISO
-  shippedDate: string | null; // DateTime como string ISO, nullable
+  orderDate: string | Date; // DateTime como string ISO o Date object
+  requiredDate: string | Date; // DateTime como string ISO o Date object
+  shippedDate: string | Date | null; // DateTime como string ISO, Date object, o nullable
   freight: number;
   shipCountry: string | null;
   productId: number;
   unitPrice: number;
   qty: number;
   discount: number;
+  customerId?: string; // For modal compatibility
 }
 
 export interface Order {
