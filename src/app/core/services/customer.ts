@@ -103,8 +103,21 @@ export class CustomerService {
   // API Methods - Producción
   getCustomers(filterCriteria?: CustomerFilterCriteria): Observable<CustomerListItem[]> {
     // Usar endpoint de sales prediction para poblar la tabla principal
-    return this.apiService.get<SalesDatePrediction[]>(API_ENDPOINTS.SALES_PREDICTION).pipe(
-      map(predictions => this.transformSalesPredictionsToListItems(predictions)),
+    return this.apiService.get<any>(API_ENDPOINTS.SALES_PREDICTION).pipe(
+      map(response => {
+        // Manejar respuesta con estructura {success: boolean, result: array} o {sucess: boolean, result: array} (typo en API)
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized:', response);
+          return [];
+        }
+        
+        return this.transformCustomerDataToListItems(data);
+      }),
       map(customers => this.applyFilters(customers, filterCriteria))
     );
   }
@@ -127,7 +140,20 @@ export class CustomerService {
   }
 
   getSalesPrediction(): Observable<SalesDatePrediction[]> {
-    return this.apiService.get<SalesDatePrediction[]>(API_ENDPOINTS.SALES_PREDICTION);
+    return this.apiService.get<any>(API_ENDPOINTS.SALES_PREDICTION).pipe(
+      map(response => {
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized for sales prediction:', response);
+          return [];
+        }
+        return data;
+      })
+    );
   }
   
   createCustomer(customer: Omit<Customer, 'id' | 'createdAt'>): Observable<Customer> {
@@ -151,6 +177,24 @@ export class CustomerService {
     );
   }
 
+  private transformCustomerDataToListItems(customerData: any[]): CustomerListItem[] {
+    const today = new Date();
+    
+    return customerData.map(customer => ({
+      id: customer.custId?.toString() || customer.customerId?.toString(),
+      name: customer.customerName,
+      lastOrderDate: customer.lastOrderDate ? new Date(customer.lastOrderDate) : null,
+      nextPredictedOrderDate: customer.predictedDate ? new Date(customer.predictedDate) : null,
+      daysSinceLastOrder: customer.lastOrderDate 
+        ? this.calculateDaysDifference(new Date(customer.lastOrderDate), today)
+        : null,
+      daysToNextOrder: customer.predictedDate 
+        ? this.calculateDaysDifference(today, new Date(customer.predictedDate))
+        : null,
+      status: this.determineStatusFromCustomerData(customer)
+    }));
+  }
+
   private transformSalesPredictionsToListItems(predictions: SalesDatePrediction[]): CustomerListItem[] {
     const today = new Date();
     
@@ -168,8 +212,6 @@ export class CustomerService {
   }
 
   private transformApiCustomersToListItems(apiCustomers: ApiCustomer[]): CustomerListItem[] {
-    const today = new Date();
-    
     return apiCustomers.map(apiCustomer => ({
       id: apiCustomer.id.toString(),
       name: apiCustomer.companyName,
@@ -179,6 +221,25 @@ export class CustomerService {
       daysToNextOrder: null,
       status: CustomerStatus.ACTIVE // Por defecto, se podría calcular basado en última orden
     }));
+  }
+
+  private determineStatusFromCustomerData(customer: any): CustomerStatus {
+    if (!customer.lastOrderDate) {
+      return CustomerStatus.NEW;
+    }
+    
+    const daysSinceLastOrder = this.calculateDaysDifference(
+      new Date(customer.lastOrderDate), 
+      new Date()
+    );
+    
+    if (daysSinceLastOrder > 90) {
+      return CustomerStatus.INACTIVE;
+    } else if (daysSinceLastOrder > 30) {
+      return CustomerStatus.AT_RISK;
+    } else {
+      return CustomerStatus.ACTIVE;
+    }
   }
 
   private determineStatusFromPrediction(prediction: SalesDatePrediction): CustomerStatus {

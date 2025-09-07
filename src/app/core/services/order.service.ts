@@ -18,14 +18,38 @@ export class OrderService {
   private apiService = inject(ApiService);
 
   getOrders(): Observable<Order[]> {
-    return this.apiService.get<Order[]>(API_ENDPOINTS.ORDER);
+    return this.apiService.get<any>(API_ENDPOINTS.ORDER).pipe(
+      map(response => {
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized:', response);
+          return [];
+        }
+        return data.map(apiOrder => this.transformApiOrderToOrder(apiOrder));
+      })
+    );
   }
 
   getOrdersByCustomer(clientId: number): Observable<OrderListItem[]> {
-    return this.apiService.get<ApiOrder[]>(API_ENDPOINTS.ORDER, {
+    return this.apiService.get<any>(API_ENDPOINTS.ORDER, {
       params: { clientId: clientId }
     }).pipe(
-      map(apiOrders => this.transformApiOrdersToListItems(apiOrders))
+      map(response => {
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized for orders:', response);
+          return [];
+        }
+        return this.transformApiOrdersToListItems(data);
+      })
     );
   }
 
@@ -37,15 +61,54 @@ export class OrderService {
   }
 
   getEmployees(): Observable<Employee[]> {
-    return this.apiService.get<Employee[]>(API_ENDPOINTS.EMPLOYEE);
+    return this.apiService.get<any>(API_ENDPOINTS.EMPLOYEE).pipe(
+      map(response => {
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized for employees:', response);
+          return [];
+        }
+        return data;
+      })
+    );
   }
 
   getProducts(): Observable<Product[]> {
-    return this.apiService.get<Product[]>(API_ENDPOINTS.PRODUCT);
+    return this.apiService.get<any>(API_ENDPOINTS.PRODUCT).pipe(
+      map(response => {
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized for products:', response);
+          return [];
+        }
+        return data;
+      })
+    );
   }
 
   getShippers(): Observable<Shipper[]> {
-    return this.apiService.get<Shipper[]>(API_ENDPOINTS.SHIPPER);
+    return this.apiService.get<any>(API_ENDPOINTS.SHIPPER).pipe(
+      map(response => {
+        let data: any[];
+        if ((response?.success || response?.sucess) && Array.isArray(response.result)) {
+          data = response.result;
+        } else if (Array.isArray(response)) {
+          data = response;
+        } else {
+          console.warn('API response format not recognized for shippers:', response);
+          return [];
+        }
+        return data;
+      })
+    );
   }
 
   getSalesPrediction(): Observable<unknown> {
